@@ -1,8 +1,8 @@
 import Trainer
-import DataDownloader
+from DataDownloader import data_downloader
 import numpy as np
 
-word_to_ind, ind_to_word = DataDownloader.get_dics()
+word_to_ind, ind_to_word = data_downloader.get_dics()
 
 def get_embeding(word: str):
     if word in word_to_ind:
@@ -40,4 +40,24 @@ print()
 
 print("REVOLUTION:")
 print(find_closest("revolution"))
+print()
+
+print("MODERN:")
+print(find_closest("modern"))
+print()
+
+print("anarchism:")
+print(find_closest("anarchism"))
+print()
+
+print("individualist:")
+print(find_closest("individualist"))
+print()
+
+print("terrorism:")
+print(find_closest("terrorism"))
+print()
+
+print("christian:")
+print(find_closest("christian"))
 print()

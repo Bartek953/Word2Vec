@@ -1,16 +1,16 @@
 import numpy as np
-import DataDownloader
+from DataDownloader import data_downloader
 from collections import deque
 from typing import Iterator, Tuple, List
 import random
 
 class DataLoader:
     def __init__(self, context_size: int = 2):
-        self.generator = DataDownloader.get_text8_generator()
-        self.word_to_ind, self.ind_to_word = DataDownloader.get_dics()
+        self.generator = data_downloader.get_text_generator()
+        self.word_to_ind, self.ind_to_word = data_downloader.get_dics()
         self.context_size = context_size
-        self.vocab_size = DataDownloader.vocab_size
-        self.dataset_size = DataDownloader.dataset_size
+        self.vocab_size = data_downloader.get_vocab_size()
+        self.dataset_size = data_downloader.get_dataset_size()
 
 
     def generate_samples(self) -> Iterator[Tuple[np.ndarray, int]]:

@@ -1,4 +1,4 @@
-import DataDownloader
+from DataDownloader import data_downloader
 import DataLoader
 import Architecture
 
@@ -9,7 +9,7 @@ learning_rate = 0.005
 optimizer = 0.005
 embed_size = 128
 eval_size = 8
-epochs = 300
+epochs = 120
 context_size = 3
 
 # objects declarations
@@ -17,8 +17,8 @@ context_size = 3
 data_loader = DataLoader.DataLoader(context_size = context_size)
 batch_gen = data_loader.generate_batches(shuffle_size, batch_size)
 
-vocab_size: int = DataDownloader.vocab_size
-dataset_size: int = DataDownloader.dataset_size
+vocab_size: int = data_downloader.get_vocab_size()
+dataset_size: int = data_downloader.get_dataset_size()
 
 model = Architecture.Model(vocab_size, embed_size, eval_size, learning_rate)
 
