@@ -6,7 +6,7 @@ extracted_path: str = 'text8'
 vocab_size = 0
 dataset_size = 0
 
-words_limit = 10000
+words_limit = 1000000
 
 # Download the data
 def download_text8_data():
