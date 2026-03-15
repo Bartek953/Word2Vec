@@ -51,7 +51,9 @@ class DataLoader:
                 buffer.append(next(sample_gen))
             
             random.shuffle(buffer)
-            for _ in range(0, len(buffer), batch_size):
-                i = random.randint(0, shuffle_size - batch_size)
+            for i in range(0, len(buffer), batch_size):
+                # i = random.randint(0, shuffle_size - batch_size)
                 batch = buffer[i: i + batch_size]
-                yield (np.array([p[0] for p in batch]), np.array([p[1] for p in batch]))
+                
+                if len(batch) == batch_size:
+                    yield (np.array([p[0] for p in batch]), np.array([p[1] for p in batch]))

@@ -101,16 +101,26 @@ class Model:
         self.output_layer = OutputLayer(vocab_size, embed_size, lr)
         self.eval_size = eval_size
         self.vocab_size = vocab_size
+        self.neg_probs = data_downloader.get_neg_samples_probs()
     
     def forward(self, batch_indices: np.ndarray, target_words: np.ndarray) -> np.ndarray:
         batch_size: int = batch_indices.shape[0]
         
-        self.eval_ind = np.random.randint(1, self.vocab_size - 1, (batch_size, self.eval_size - 1))
-        self.eval_ind[self.eval_ind >= target_words[:, np.newaxis]] += 1
-        #to not get target value
+        # creating negative samples
+        #self.eval_ind = np.random.randint(1, self.vocab_size - 1, (batch_size, self.eval_size - 1))
+        # chance of randomly getting target word is near zero
+        self.eval_ind = np.random.choice(
+            self.vocab_size, 
+            size=(batch_size * (self.eval_size - 1)), 
+            p=self.neg_probs
+        ).reshape(batch_size, self.eval_size - 1)
+        
+        # self.eval_ind[self.eval_ind >= target_words[:, np.newaxis]] += 1
         self.eval_ind = np.column_stack([target_words, self.eval_ind])
         
+        
         hidden_out = self.hidden_layer.forward(batch_indices)
+        
         
         self.predictions = self.output_layer.forward(hidden_out, self.eval_ind)
         

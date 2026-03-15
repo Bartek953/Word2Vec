@@ -2,6 +2,7 @@ import os
 import urllib.request
 import zipfile
 from collections.abc import Iterator
+import numpy as np
 
 class DataDownloader:
     def __init__(self, text_lim: int = -1, extracted_path: str = "text8", url: str = "http://mattmahoney.net/dc/text8.zip"):
@@ -54,6 +55,17 @@ class DataDownloader:
                 self.word_freq[word] = 1
             else:
                 self.word_freq[word] += 1
+                
+    def get_neg_samples_probs(self) -> np.ndarray:
+        probs = np.zeros(self.vocab_size)
+        
+        for word, idx in self.word_to_ind.items():
+            if word == self.unk_token:
+                probs[idx] = 0
+            else:
+                probs[idx] = self.word_freq[word] ** 0.75
+
+        return probs / np.sum(probs)
        
     # creates vocabulary dictionaries 
     def __create_dics__(self) -> None:
