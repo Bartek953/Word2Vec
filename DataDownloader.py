@@ -8,11 +8,16 @@ class DataDownloader:
         self.extracted_path = extracted_path
         self.url = url
         
+        # I will ignore words with frequency less than 5
+        self.unk_token = "[UNKNOWN]"
+        self.ignore_ratio = 4
+        
         self.text_lim = text_lim
         
         self.__download_data__()
         self.vocab_size = 0
         self.dataset_size = 0
+        self.__count_words__()
         self.__create_dics__()
         
     # downloads dataset if not already downloaded
@@ -34,6 +39,21 @@ class DataDownloader:
         print("Extracting...")
         with zipfile.ZipFile(zip_path, 'r') as z:
             z.extractall()
+            
+    def __count_words__(self) -> None:
+        text_gen = self.get_text_generator(infinite=False)
+        
+        self.dataset_size = 0
+        
+        self.word_freq = dict()
+        
+        for word in text_gen:
+            self.dataset_size += 1
+            
+            if word not in self.word_freq:
+                self.word_freq[word] = 1
+            else:
+                self.word_freq[word] += 1
        
     # creates vocabulary dictionaries 
     def __create_dics__(self) -> None:
@@ -42,16 +62,15 @@ class DataDownloader:
         self.word_to_ind = dict()
         self.ind_to_word = dict()
         
-        curr_word_index: int = 0
+        self.word_to_ind[self.unk_token] = 0
+        self.ind_to_word[0] = self.unk_token
+        self.vocab_size = 1
         
-        self.vocab_size = 0
-        self.dataset_size = 0
+        curr_word_index: int = 1
         
         for word in text_gen:
-            self.dataset_size += 1
-            if word not in self.word_to_ind:
-                self.vocab_size += 1
-                
+            if word not in self.word_to_ind and self.word_freq[word] > self.ignore_ratio: 
+                self.vocab_size += 1       
                 self.word_to_ind[word] = curr_word_index
                 self.ind_to_word[curr_word_index] = word
                 
@@ -96,4 +115,4 @@ class DataDownloader:
             if infinite == False:
                 break
             
-data_downloader = DataDownloader(text_lim = 500000)
+data_downloader = DataDownloader(text_lim = 1000000)

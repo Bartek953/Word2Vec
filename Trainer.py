@@ -5,11 +5,11 @@ import Architecture
 # setup
 shuffle_size = 4096
 batch_size = 128
-learning_rate = 0.005
+learning_rate = 0.004
 optimizer = 0.005
 embed_size = 128
 eval_size = 8
-epochs = 120
+epochs = 100
 context_size = 3
 
 # objects declarations

@@ -1,4 +1,5 @@
 import numpy as np
+from DataDownloader import data_downloader
 
 def sigmoid(batch_embed: np.ndarray) -> np.ndarray:
     #batch_embed: (batch_size, context_size)
@@ -104,7 +105,7 @@ class Model:
     def forward(self, batch_indices: np.ndarray, target_words: np.ndarray) -> np.ndarray:
         batch_size: int = batch_indices.shape[0]
         
-        self.eval_ind = np.random.randint(0, self.vocab_size - 1, (batch_size, self.eval_size - 1))
+        self.eval_ind = np.random.randint(1, self.vocab_size - 1, (batch_size, self.eval_size - 1))
         self.eval_ind[self.eval_ind >= target_words[:, np.newaxis]] += 1
         #to not get target value
         self.eval_ind = np.column_stack([target_words, self.eval_ind])
@@ -125,7 +126,13 @@ class Model:
         out_grad = self.output_layer.backpropagate(labels, self.predictions)
         self.hidden_layer.backpropagate(out_grad)
     
-    def get_embeding(self, index: int) -> np.ndarray:
+    def get_word_embeding(self, word: str):
+        if word not in data_downloader.word_to_ind:
+            return self.hidden_layer.weights[0]
+        else:
+            return self.hidden_layer.weights[data_downloader.word_to_ind[word]]
+        
+    def get_ith_embeding(self, index: int) -> np.ndarray:
         return self.hidden_layer.weights[index]
 
     def update_lr(self, new_lr):
