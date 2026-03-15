@@ -1,61 +1,51 @@
-import os
-import urllib.request
-import zipfile
+import numpy as np
+import DataDownloader
+from collections import deque
+from typing import Iterator, Tuple, List
+import random
 
-extracted_path: str = 'text8'
+class DataLoader:
+    def __init__(self, context_size: int = 2):
+        self.generator = DataDownloader.get_text8_generator()
+        self.word_to_ind, self.ind_to_word = DataDownloader.get_dics()
+        self.context_size = context_size
+        self.vocab_size = DataDownloader.vocab_size
+        self.dataset_size = DataDownloader.dataset_size
 
-# Download the data
-def download_text8_data():
-    url: str = 'http://mattmahoney.net/dc/text8.zip'
-    zip_path: str = 'text8.zip'
 
-    # 1. Checks whether file already exists
-    if os.path.exists(extracted_path):
-        print("File text8 already exists")
-        return
-
-    # 2. File doesn't exists, download the zip file
-    if not os.path.exists(zip_path):
-        print("Downloading text8")
-        urllib.request.urlretrieve(url, zip_path)
-        print("Succesfully text8 downloaded")
-
-    # 3. Extract the file
-    print("Extracting...")
-    with zipfile.ZipFile(zip_path, 'r') as z:
-        z.extractall()
-      
-# Yields words, to not load whole dataset into RAM 
-def get_text8_generator(file_path: str = extracted_path, chunk_size = 1024 * 1024):
-    download_text8_data()
-    remaining = ""
-    with open(file_path, 'r') as f:
+    def generate_samples(self) -> Iterator[Tuple[np.ndarray, int]]:
+        sliding_window = deque(maxlen = 2 * self.context_size + 1)
+        
         while True:
-            chunk = f.read(chunk_size)
-            if not chunk:
-                if remaining: yield remaining
-                break
+            sliding_window.clear()
             
-            chunk = remaining + chunk
-            words = chunk.split(' ')
-            #in case last word isn't fully loaded
-            remaining = words.pop()
+            word_counter:int  = 0
             
-            for word in words:
-                if word: yield word
+            for word in self.generator:
+                word_ind: int = self.word_to_ind[word]
+                sliding_window.append(word_ind)
                 
-# Returns word dics: word_to_ind and ind_to_word
-def get_dics(file_path: str = extracted_path):
-    text8_gen = get_text8_generator(file_path=file_path)
-    
-    word_to_ind = dict()
-    ind_to_word = dict()
-    curr_word_index: int = 0
-    
-    for word in text8_gen:
-        if word not in word_to_ind:
-            word_to_ind[word] = curr_word_index
-            ind_to_word[curr_word_index] = word
+                if len(sliding_window) == sliding_window.maxlen:
+                    full_window = list(sliding_window)
+                    target: int = full_window[self.context_size]
+                    context: list = full_window[:self.context_size] + full_window[self.context_size + 1:]
+                    yield np.array(context), target
+                    
+                word_counter += 1
+                if word_counter >= self.dataset_size:
+                    break
+                
+    def generate_batches(self, shuffle_size: int = 128, batch_size: int = 16):
+        sample_gen = self.generate_samples()
+        
+        while True:
+            buffer = []
             
-            curr_word_index += 1
-    return (word_to_ind, ind_to_word)
+            while len(buffer) < shuffle_size:
+                buffer.append(next(sample_gen))
+            
+            random.shuffle(buffer)
+            for _ in range(shuffle_size // 4):
+                i = random.randint(0, shuffle_size - batch_size)
+                batch = buffer[i: i + batch_size]
+                yield (np.array([p[0] for p in batch]), np.array([p[1] for p in batch]))

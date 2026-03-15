@@ -1,1 +1,1 @@
-I will be implementing word2vec using CBOW (using surounding words to predict one in the middle), negative sampling (to make it faster). I will use text8 as my text dataset.
+I will be implementing word2vec using CBOW (using surounding words to predict one in the middle), negative sampling (to make it faster). I will use text8 as my text dataset. The loss is cross entropy
