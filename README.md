@@ -1,1 +1,11 @@
-I will be implementing word2vec using CBOW (using surounding words to predict one in the middle), negative sampling (to make it faster). I will use text8 as my text dataset. The loss is cross entropy
+Word2Vec implementation in numpy
+
+Overview:
+This implementation uses CBOW (continous bag of words - predicting middle word based on surrouding ones) architecture. To make it faster it uses sparse matrix multiplication and negative sampling (randomly choosing a few outputs in opposite to calculate answers for whole vocabulary). The negative sampling probability distribution is word_frequency^(3/4), as in original paper. For training it utilizes text8 dataset, however it can be easily changed to other one - data are loaded using generators, to not load whole dataset into RAM. Training igores words that appear very rarely.
+
+Project consits of:
+- DataDownloader - loads dataset, creates dictionaries and generators
+- DataLoader - creates batch generator
+- Architecture - implemts actual model architecture providing "Model" class
+- Trainer - training loop
+- main - allows for some experiments/tests
