@@ -2,10 +2,11 @@ import os
 import urllib.request
 import zipfile
 from collections.abc import Iterator
+import Config
 import numpy as np
 
 class DataDownloader:
-    def __init__(self, text_lim: int = -1, extracted_path: str = "text8", url: str = "http://mattmahoney.net/dc/text8.zip"):
+    def __init__(self, text_lim: int = -1, extracted_path: str = Config.file_path, url: str = Config.dataset_url):
         self.extracted_path = extracted_path
         self.url = url
         
@@ -127,4 +128,4 @@ class DataDownloader:
             if infinite == False:
                 break
             
-data_downloader = DataDownloader(text_lim = 1000000)
+data_downloader = DataDownloader(text_lim = Config.text_len_lim)

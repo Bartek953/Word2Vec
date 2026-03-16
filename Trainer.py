@@ -1,16 +1,17 @@
 from DataDownloader import data_downloader
 import DataLoader
 import Architecture
+import Config
 
 # setup
-shuffle_size = 4096
-batch_size = 128
-learning_rate = 0.004
-optimizer = 0.005
-embed_size = 128
-eval_size = 8
-epochs = 100
-context_size = 3
+shuffle_size = Config.shuffle_size
+batch_size = Config.batch_size
+learning_rate = Config.learning_rate
+optimizer = Config.optimizer
+embed_size = Config.embed_size
+eval_size = Config.eval_size
+epochs = Config.epochs
+context_size = Config.context_size
 
 # objects declarations
 

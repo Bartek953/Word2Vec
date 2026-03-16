@@ -8,4 +8,10 @@ Project consits of:
 - DataLoader - creates batch generator
 - Architecture - implemts actual model architecture providing "Model" class
 - Trainer - training loop
-- main - allows for some experiments/tests
+- Config - contains model hyperparameters and download config
+- main - entry point, allows for some experiments/tests
+
+Usage:
+Modify config if needed. You can add/change test to main.py.
+Run: pip install numpy
+Run: python main.py
