@@ -22,10 +22,10 @@ def find_closest(target: str, n: int = 7):
     similarities[0] = -np.inf
     similarities[target_idx] = -np.inf
     
-    # Posortuj i wybierz najlepsze (pomijając samo słowo 'target')
+    # Sort and pick best options
     closest_indices = np.argsort(similarities)[-n:][::-1]
     
-    return [(ind_to_word[idx], similarities[idx]) for idx in closest_indices][:n]
+    return [ind_to_word[idx] for idx in closest_indices][:n]
 
 print("KING:")
 print(find_closest("king"))

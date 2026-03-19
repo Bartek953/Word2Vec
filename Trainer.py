@@ -2,12 +2,13 @@ from DataDownloader import data_downloader
 import DataLoader
 import Architecture
 import Config
+from tqdm import tqdm
 
 # setup
 shuffle_size = Config.shuffle_size
 batch_size = Config.batch_size
 learning_rate = Config.learning_rate
-optimizer = Config.optimizer
+lr_decay = Config.lr_decay
 embed_size = Config.embed_size
 eval_size = Config.eval_size
 epochs = Config.epochs
@@ -27,7 +28,10 @@ n_batches: int = dataset_size // batch_size
 
 # training loop
 print(f"Starting training, batches: {n_batches}, epochs {epochs}, lr {learning_rate}")
-for e in range(epochs):
+
+pbar = tqdm(range(epochs), desc="Training: ")
+
+for e in pbar:
     loss = 0
     for i in range(n_batches):
         batch_x, batch_y = next(batch_gen)
@@ -36,8 +40,11 @@ for e in range(epochs):
         
         model.backpropagate()
     
-    model.update_lr(learning_rate / (1 + e * optimizer))
-        
-    print(f"Epoch: {e}, Loss: {loss}, LR: {model.lr}")
+    model.update_lr(learning_rate / (1 + e * lr_decay))
+    
+    pbar.set_postfix({
+        "loss": f"{loss:.4f}", 
+        "lr": f"{model.lr:.6f}"
+    })
         
         

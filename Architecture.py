@@ -40,9 +40,7 @@ class HiddenLayer:
         
         grad_per_word = prev_grad / context_size
         
-        # for i, indices in enumerate(self.last_indices):
-        #     self.weights[indices] -= self.lr * grad_per_word[i]
-        grad_broadcasted = grad_per_word[:, np.newaxis, :] # Kształt: (batch, 1, embed)
+        grad_broadcasted = grad_per_word[:, np.newaxis, :] # (batch, 1, embed_size)
         np.add.at(self.weights, self.last_indices, -self.lr * grad_broadcasted)
         
 
@@ -54,7 +52,7 @@ class OutputLayer:
     
     # Takes in batch of embedings from HiddenLayer and word indices to calculate
     def forward(self, batch_embed: np.ndarray, batch_indices: np.ndarray) -> np.ndarray:
-        #bacth_embed: (batch_size, embed_size)
+        #batch_embed: (batch_size, embed_size)
         #batch_indices: (batch_size, eval_size)
         
         self.last_indices = batch_indices
@@ -86,8 +84,6 @@ class OutputLayer:
         grad_hidden = np.einsum('bk,bkn->bn', loss_grad, part_matrix)
         # (batch_size embed_size)
         
-        # for i, indices in enumerate(self.last_indices):
-        #     self.weights[indices] -= self.lr * grad_out[i]
         np.add.at(self.weights, self.last_indices, -self.lr * grad_out)
         
         return grad_hidden
@@ -107,7 +103,6 @@ class Model:
         batch_size: int = batch_indices.shape[0]
         
         # creating negative samples
-        #self.eval_ind = np.random.randint(1, self.vocab_size - 1, (batch_size, self.eval_size - 1))
         # chance of randomly getting target word is near zero
         self.eval_ind = np.random.choice(
             self.vocab_size, 
@@ -115,7 +110,6 @@ class Model:
             p=self.neg_probs
         ).reshape(batch_size, self.eval_size - 1)
         
-        # self.eval_ind[self.eval_ind >= target_words[:, np.newaxis]] += 1
         self.eval_ind = np.column_stack([target_words, self.eval_ind])
         
         

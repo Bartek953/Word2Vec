@@ -52,7 +52,6 @@ class DataLoader:
             
             random.shuffle(buffer)
             for i in range(0, len(buffer), batch_size):
-                # i = random.randint(0, shuffle_size - batch_size)
                 batch = buffer[i: i + batch_size]
                 
                 if len(batch) == batch_size:
