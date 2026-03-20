@@ -1,11 +1,12 @@
 import numpy as np
 from DataDownloader import data_downloader
+import Config
 
 def sigmoid(batch_embed: np.ndarray) -> np.ndarray:
     #batch_embed: (batch_size, context_size)
     return 1 / (1 + np.exp(-np.clip(batch_embed, -15, 15)))
 
-def cross_entropy(labels, predictions):
+def cross_entropy(labels, predictions) -> int:
     epsilon = 1e-12
     predictions = np.clip(predictions, epsilon, 1.0 - epsilon)
     
@@ -33,7 +34,7 @@ class HiddenLayer:
         return np.mean(embeded_words, axis = 1)
         # (batch_size, embed_size)
         
-    def backpropagate(self, prev_grad: np.ndarray):
+    def backpropagate(self, prev_grad: np.ndarray) -> None:
         #prev_grad: (batch_size, embed_size)
         
         context_size = self.last_indices.shape[1]
@@ -91,13 +92,15 @@ class OutputLayer:
         
 
 class Model:
-    def __init__(self, vocab_size: int, embed_size: int, eval_size: int, lr: float):
-        self.lr = lr
-        self.hidden_layer = HiddenLayer(vocab_size, embed_size, lr)
-        self.output_layer = OutputLayer(vocab_size, embed_size, lr)
-        self.eval_size = eval_size
-        self.vocab_size = vocab_size
+    # parameters are set in Config
+    def __init__(self):
+        self.lr = Config.learning_rate
+        self.eval_size = Config.eval_size
+        self.vocab_size = data_downloader.get_vocab_size()
         self.neg_probs = data_downloader.get_neg_samples_probs()
+        
+        self.hidden_layer = HiddenLayer(self.vocab_size, Config.embed_size, self.lr)
+        self.output_layer = OutputLayer(self.vocab_size, Config.embed_size, self.lr)
     
     def forward(self, batch_indices: np.ndarray, target_words: np.ndarray) -> np.ndarray:
         batch_size: int = batch_indices.shape[0]
@@ -123,14 +126,14 @@ class Model:
         
         return cross_entropy(labels, self.predictions)
     
-    def backpropagate(self):
+    def backpropagate(self) -> None:
         labels = np.zeros(self.eval_ind.shape)
         labels[:, 0] = 1
         
         out_grad = self.output_layer.backpropagate(labels, self.predictions)
         self.hidden_layer.backpropagate(out_grad)
     
-    def get_word_embeding(self, word: str):
+    def get_word_embeding(self, word: str) -> np.ndarray:
         if word not in data_downloader.word_to_ind:
             return self.hidden_layer.weights[0]
         else:
@@ -139,8 +142,31 @@ class Model:
     def get_ith_embeding(self, index: int) -> np.ndarray:
         return self.hidden_layer.weights[index]
 
-    def update_lr(self, new_lr):
+    def update_lr(self, new_lr) -> None:
         self.lr = new_lr
         self.hidden_layer.lr = new_lr
         self.output_layer.lr = new_lr
+    
+    def save(self, filename: str) -> None:
+        try:
+            np.savez(filename, 
+                 hidden_w=self.hidden_layer.weights, 
+                 output_w=self.output_layer.weights
+            )
+            print("Succesfully saved the model!")
+        except Exception as e:
+            print(f"[MODEL SAVE ERROR]: {e}")
+    
+    def load(self, filename: str) -> None:
+        try:
+            with np.load(filename) as data:
+                if (data['hidden_w'].shape != self.hidden_layer.weights.shape
+                    or data['output_w'].shape != self.output_layer.weights.shape):
+                    print("[MODEL LOAD ERROR] shapes don't match")
+                else:
+                    self.hidden_layer.weights = data['hidden_w']
+                    self.output_layer.weights = data['output_w']
+                    print("Succesfully loaded the model!")
+        except Exception as e:
+            print(f"[MODEL LOAD ERROR]: {e}")
         

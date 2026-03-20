@@ -1,17 +1,24 @@
 import Trainer
 from DataDownloader import data_downloader
+import Architecture
 import numpy as np
+
+model = Architecture.Model()
+Trainer.train(model)
+
+model.save('data.npz')
+#model.load('data.npz')
 
 word_to_ind, ind_to_word = data_downloader.get_dics()
         
-def find_closest(target: str, n: int = 7):
+def find_closest(target: str, n: int = 7) -> [str]:
     if target not in word_to_ind:
         print("Not in dictionary")
         return
-    target_vec = Trainer.model.get_word_embeding(target)
+    target_vec = model.get_word_embeding(target)
     target_idx = word_to_ind[target]
     
-    all_vecs = Trainer.model.hidden_layer.weights
+    all_vecs = model.hidden_layer.weights
     
     norm_target = np.linalg.norm(target_vec)
     norm_all = np.linalg.norm(all_vecs, axis=1)
@@ -27,43 +34,9 @@ def find_closest(target: str, n: int = 7):
     
     return [ind_to_word[idx] for idx in closest_indices][:n]
 
-print("KING:")
-print(find_closest("king"))
-print()
 
-print("FRENCH:")
-print(find_closest("french"))
-print()
-
-print("REVOLUTION:")
-print(find_closest("revolution"))
-print()
-
-print("MODERN:")
-print(find_closest("modern"))
-print()
-
-print("individualist:")
-print(find_closest("individualist"))
-print()
-
-
-print("individualist:")
-print(find_closest("individualist"))
-print()
-
-print("paris:")
-print(find_closest("paris"))
-print()
-
-print("queen:")
-print(find_closest("queen"))
-print()
-
-print("computer:")
-print(find_closest("computer"))
-print()
-
-print("science:")
-print(find_closest("science"))
-print()
+test_words = ["king", "queen", "french", "revolution", "computer", "science", "modern"]
+for word in test_words:
+    print(f"{word.upper()}:")
+    print(find_closest(word))
+    print()

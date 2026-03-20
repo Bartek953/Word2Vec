@@ -41,7 +41,7 @@ class DataLoader:
                 if word_counter >= self.dataset_size:
                     break
                 
-    def generate_batches(self, shuffle_size: int = 128, batch_size: int = 16):
+    def generate_batches(self, shuffle_size: int = 128, batch_size: int = 16) -> Iterator[Tuple[np.ndarray, np.ndarray]]:
         sample_gen = self.generate_samples()
         
         while True:
